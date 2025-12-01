@@ -1,0 +1,29 @@
+void EXTI9_5_IRQHandler(void) {
+    // Check if encoderA (PA6) triggered the interrupt
+    if (EXTI->PR1 & (1 << gpioPinOffset(encoderA))) {
+        // Clear the pending interrupt flag for encoderA by writing 1 to it
+        EXTI->PR1 |= (1 << gpioPinOffset(encoderA));
+
+        // To determine direction, compare the state of the other pin (B)
+        // to the state of the pin that triggered the interrupt (A).
+        if (digitalRead(encoderB) != digitalRead(encoderA)) {
+            pulse_count++; // Clockwise rotation
+        } else {
+            pulse_count--; // Counter-clockwise rotation
+        }
+    }
+
+    // Check if encoderB (PA8) triggered the interrupt
+    if (EXTI->PR1 & (1 << gpioPinOffset(encoderB))) {
+        // Clear the pending interrupt flag for encoderB
+        EXTI->PR1 |= (1 << gpioPinOffset(encoderB));
+
+        // To determine direction, compare the state of the other pin (A)
+        // to the state of the pin that triggered the interrupt (B).
+        if (digitalRead(encoderA) == digitalRead(encoderB)) {
+            pulse_count++; // Clockwise rotation
+        } else {
+            pulse_count--; // Counter-clockwise rotation
+        }
+    }
+}
